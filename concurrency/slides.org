@@ -1,0 +1,492 @@
+* 1. Concurrency
+
+- David Wen Riccardi-Zhu
+- Senior Software Engineer @ Good Uncle
+- https://github.com/dwrz
+- dwrz@dwrz.net
+
+Slides and code: https://github.com/dwrz/talks/concurrency.
+
+* 2. Why
+
+You'll likely encounter it at work:
+
+- Client requests to your backend
+- Database and API requests made by your backend
+- Frontend rendering
+
+* 3. Why
+
+Performance Benefits
+
+- I/O versus CPU bound applications.
+- Typically outweigh gains from optimized data structures and algorithms.
+- Hardware limitations.
+  - Rate of single core performance improvement is slowing.
+  - More cores.
+
+* 4. Why
+
+Expressive
+
+* 5. Why
+
+Difficult to do correctly.
+
+Easy to do incorrectly.
+
+* 6. Goals
+
+- Give you a rough sense of what concurrency is.
+- Provide context to help you understand how it's made possible.
+- Practical demonstration, to expose some of the trade-offs.
+
+* 7. Three Parts
+
+1. Fundamentals
+2. Application
+3. Infrastructure
+
+* 8. Definition
+
+/Concurrency/
+1. A running together in place or time.
+2. Simultaneous occurrence.
+
+OK starting point, but:
+
+Time, and simultaneity, is /complicated/.
+
+A second is a duration, not an instant.
+
+Two things can happen in the same second and not be simultaneous.
+
+In computer science, this nuance matters.
+
+* 9. Time
+
+|----------------------+----------------+----------------|
+| System Event         | Actual Latency | Scaled Latency |
+|----------------------+----------------+----------------|
+| One CPU cycle        | 0.4 ns         | 1 s            |
+| Level 1 cache access | 0.9 ns         | 2 s            |
+| Level 2 cache access | 2.8 ns         | 7 s            |
+| Level 3 cache access | 28 ns          | 1 min          |
+| Main memory access   | ~100 ns        | 4 min          |
+| NVMe SSD I/O         | ~25 μs         | 17 hrs         |
+| SSD I/O              | 50–150 μs      | 1.5–4 days     |
+| Rotational disk I/O  | 1–10 ms        | 1–9 months     |
+| Internet: SF to NYC  | 65 ms          | 5 years        |
+| Internet: SF to HK   | 141 ms         | 11 years       |
+|----------------------+----------------+----------------|
+
+Source: [[https://www.prowesscorp.com/computer-latency-at-a-human-scale/]]
+
+* 10. Example
+
+- Get the current temperature of ten most populous cities in the US.
+
+- First, /sequentially./
+- Then, /concurrently/.
+
+[[file:cmd/temperatures/run.sh]]
+
+* 11. Example
+
+[[file:images/concurrent-requests.jpg]]
+
+* 12. Cooking Recipes
+
+- Step-by-step
+- Concurrent
+  - Pre-heat oven
+  - Boil water
+  - Timers
+
+* 13. Multitasking
+
+Computers can "simultaneously" work on:
+
+- Different /parts/ of a recipe
+- Different /recipes/
+
+* 14. htop
+
+* 15. How?
+
+- Operating System's *Scheduler*
+- Hardware (interrupts)
+- Not just multiple cores!
+
+* 16. NB: Concurrency != Parallelism
+
+First consumer multi-core CPUs released in mid-2000's.
+
+Even before that, computers were able to multitask with one core.
+
+* 17. Cooperative Scheduling
+[[file:images/cooperative-scheduling.jpg]]
+
+* 18. Preemptive Scheduling
+[[file:images/preemptive-scheduling.jpg]]
+
+* 19. Preemptive Scheduling
+[[file:images/preemptive-scheduling-tree.jpg]]
+
+* 20. Single Core
+[[file:images/single-core-concurrency.jpg]]
+
+* 21. Multi Core
+[[file:images/preemptive-scheduling-multi-core.jpg]]
+
+* 22. Concurrency versus Parallelism
+
+- Parallelism :: performing computations at the same moment.
+  - Multiple cores.
+  - Multiples computers.
+  - Kind of like having multiple cooks in a kitchen.
+
+- Concurrency :: performing computations over inter-leaving, non-sequential time periods.
+  - Single or multi-core.
+
+* 23. Processes and Threads
+
+Computers can "simultaneously" work on:
+
+- Different /parts/ of a recipe
+- Different /recipes/
+
+- Process :: a program in execution (recipe).
+- Thread :: smallest sequence of programmed instructions that can be managed independently by a scheduler (part of a recipe).
+
+* 24. Processes and Threads
+
+Processes
+- Have their own memory space
+  - Instructions
+  - Constants
+  - Stack
+  - Heap
+- Start out with one thread (the /main/ thread).
+- Can fork -- create a child process.
+- Inter-Process Communication (IPC)
+
+* 25. Processes and Threads
+
+Threads (a.k.a, lightweight processes)
+
+- Share:
+  - Memory
+  - Instructions
+  - Open files (descriptors)
+  - Signals and signal handlers
+  - Etcetera...
+
+- Less resource intensive than processes.
+
+* 26. Processes and Threads
+
+[[file:images/process-vs-thread.jpg]]
+
+Source: https://stackoverflow.com/questions/16354460/forking-vs-threading/16354658
+
+* 27. htop
+
+Press ~H~ to show threads.
+
+* 28. Languages and Runtimes
+
+- ~C~, ~C++~, ~Rust~ allow for fine-grained control of processes and threads.
+
+- ~JavaScript~: single-threaded (for your code), runtimes (Chrome, nodejs) implement concurrency via an event loop.
+
+- ~Go~: runtime multi-threading, multiplexes goroutines onto threads.
+
+* 29. nodejs
+
+[[file:images/nodejs-event-loop.png]]
+
+Source: [[https://medium.com/preezma/node-js-event-loop-architecture-go-deeper-node-core-c96b4cec7aa4]]
+
+* 30. Go
+
+[[file:images/go-scheduler.png]]
+
+Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals/
+
+* 31. Quick Review
+
+- Sequential versus Concurrent Steps
+  - Compare with recipes.
+- Concurrency versus Parallelism
+  - Multiple cooks.
+- Operating System Scheduler
+- Processes and Threads
+- Languages and Runtimes
+
+* 32. Part 2: Using Concurrency
+
+Typical use cases:
+- Network I/O
+   - Requests between clients and servers.
+   - Requests to a database.
+   - Requests between microservices.
+   - Requests to external APIs.
+
+- User interfaces
+  - Capturing user input
+  - Rendering output
+
+- Similar, but independent computations.
+
+- Solving problems that are best expressed with concurrency.
+
+* 33. JavaScript
+
+- Callbacks
+- Promises
+- async/await
+
+What is the output of the following? Why?
+#+begin_src javascript
+console.log('start');
+
+setTimeout(() => console.log('callback 1'), 0);
+
+console.log('middle');
+
+setTimeout(() => console.log('callback 2'), 0);
+
+console.log('end');
+#+end_src
+
+* 34. Go
+
+1. Shared Memory with Mutex (Mutual Exclusion)
+   - Pitfall: synchronization, debugging.
+2. Message Passing (Channels and Goroutines)
+   - Pitfall: resources usage, complexity.
+
+* 35. Mutex Example
+Concurrent updates to a bank account balance.
+
+Code:
+[[file:cmd/mutex/main.go]]
+
+Run: [[file:cmd/mutex/run.sh]]
+  - Without mutex.
+  - With mutex.
+
+* 36. Data Races
+[[file:images/data-race.jpg]]
+
+* 37. Mutex
+
+/Mutual Exclusion/
+
+- Purpose: protect a critical section of code.
+- Effect: serialization.
+
+* 38. Race Detector
+
+- Without mutex.
+- With mutex.
+
+* 39. Tradeoffs: Validating Correctness, Testing, Debugging
+
+- Non-deterministic behavior
+  - Works fine on one run, fatal bug in another.
+  - Up to how the scheduler(s) order things at execution time.
+- Concealed bugs
+  - Heisenbugs
+
+* 40. Message Passing
+
+Proverbs:
+#+begin_quote
+Don't communicate by sharing memory, share memory by communicating.
+
+Channels orchestrate, mutexes serialize.
+#+end_quote
+
+* 41. Requirements
+
+- Read CSV
+  - 50 in our example
+  - Full list is ~42,000
+
+- Get temperature with OpenWeatherMap API
+  - 60 requests per minute
+  - Need to rate limit our API requests.
+
+- Display running list of top ten temperatures.
+
+* 42. Concurrency Hallmarks
+
+- Repeatedly processing similar data (lines of CSV)
+- Network I/O
+- UI I/O
+
+* 43. Message Passing Example
+
+Run: [[file:cmd/csp/run.sh]]
+
+* 44. Code Walkthrough
+
+[[file:cmd/csp/main.go]]
+
+* 45. Channels and Goroutines
+[[file:images/message-passing-example-diagram.jpg]]
+
+* 46. Channels and Goroutines
+[[file:images/go-scheduler.jpg]]
+
+* 47. Scaling
+
+What if:
+- We wanted to process the entire list of 42,000 zip codes?
+- We had access to the Enterprise tier of the Open Weather Map API (200,000 requests per minute).
+
+Could we just get rid of the limiter?
+
+* 48. Resources
+
+Probably not, because:
+
+- OS limit on open files (~ulimit~)
+  - Ask me how I know...
+- Server load
+- Network load
+- CPU
+  - Ranking goroutine becomes a chokepoint.
+  - Data structures and algorithms could help here.
+- Goroutines are cheap, but not free.
+
+* 49. Possible Solutions
+
+- Use a semaphore to limit concurrency.
+- Buffers
+
+* 50. Designing and Managing Concurrency
+
+- Size of input matters.
+- Resources
+- Pipelines
+- Chokepoints
+- Backpressure
+- Complexity
+
+* 51. Quick Review
+
+Techniques for implementing and managing concurrency:
+- Event loop
+- Mutexes
+- Communication (channels and goroutines)
+
+Concurrency Pitfalls:
+- Synchronization
+- Resource usage
+- Debugging
+- Complexity
+  - Need to think differently about concurrent code.
+
+* 52. Part 3: Infrastructure Concurrency
+
+Concurrent applications running concurrently on distributed computers.
+
+- Client Application
+- Backend Application
+- Databases
+- Host and Network Infrastructure
+
+* 53. Student Context
+
+- Simple architectures:
+  - Monolithic
+  - Single DB
+- Few concurrent users
+
+* 54. Professional Context
+
+- Complex, sometimes messy architectures.
+  - Containers
+  - Queues
+  - Workers
+  - Tech Debt
+  - Multiple Servers
+  - Microservices
+  - Multiple datastores
+  - Distributed databases
+- Many concurrent users
+- Running longer (more vulnerable to failures, downtime)
+
+* 55. Example
+[[file:images/infrastructure-data-race.jpg]]
+
+* 56. Review
+
+- What concurrency is
+  - Sequential versus concurrent
+  - Comparison with recipes
+  - Compared to parallelism
+- How it is implemented
+  - Operating System Scheduler and Interrupts
+  - Languages and Runtimes
+
+* 57. Review
+
+- When, why, and how to use it
+  - I/O + UI
+  - Similar, independent computations
+  - Expressiveness
+
+- Pitfalls
+  - Synchronization
+  - Resources Usage
+  - Debugging
+  - Complexity
+
+* 58. Review
+
+- Infrastructure
+  - Data Race
+
+* 59. Conclusion
+
+- Goals:
+  - Give you a rough sense of what concurrency is.
+  - Provide context to help you understand what's going on.
+  - Practical exposure, to expose some of the trade-offs.
+
+- Awareness and Sensitivity
+
+- Remember:
+  - /Premature optimization is the root of all evil/.
+  - Tradeoffs and economics (resources, costs, developer time).
+  - Learning is continuous...
+
+* 60. Further Reading
+
+- [[https://slikts.github.io/concurrency-glossary/][Concurrency Glossary]]
+- [[https://blog.golang.org/waza-talk][Concurrency is not parallelism]]
+- [[https://en.wikipedia.org/wiki/Executable_and_Linkable_Format][Executable and Linkable Format]]
+- [[https://www.youtube.com/watch?v=KBZlN0izeiY][GopherCon 2017: Kavya Joshi - Understanding Channels]]
+- [[http://web.mit.edu/6.005/www/fa15/][MIT 6.005: Software Construction]]
+  - Chapters 19, 20, 22, 23
+- [[https://www.gopl.io/][The Go Programming Language]]
+- [[https://en.wikipedia.org/wiki/Concurrency_(computer_science)][Wikipedia: Concurrency]]
+- [[https://en.wikipedia.org/wiki/Concurrency_control][Wikipedia: Concurrency Control]]
+- [[https://en.wikipedia.org/wiki/Concurrent_computing][Wikipedia: Concurrent Computing]]
+- [[https://en.wikipedia.org/wiki/Deadlock][Wikipedia: Deadlock]]
+- [[https://en.wikipedia.org/wiki/Dining_philosophers_problem][Wikipedia: Dining Philosophers Problem]]
+- [[https://www.backblaze.com/blog/whats-the-diff-programs-processes-and-threads/][What’s the Diff: Programs, Processes, and Threads]]
+- [[https://www.youtube.com/watch?v=8aGhZQkoFbQ&t=13s][What the heck is the event loop anyway? | Philip Roberts]]
+- [[https://en.wikipedia.org/wiki/Heisenbug][Wikipedia: Heisenbug]]
+- [[https://en.wikipedia.org/wiki/Interrupt][Wikipedia: Interrupt]]
+- [[https://en.wikipedia.org/wiki/Libuv][Wikipedia: Libuv]]
+- [[https://en.wikipedia.org/wiki/Process_(computing)][Wikipedia: Process]]
+- [[https://en.wikipedia.org/wiki/Scheduling_(computing)][Wikipedia: Scheduling]]
+- [[https://en.wikipedia.org/wiki/Therac-25][Wikipedia: Therac-25]]
+- [[https://en.wikipedia.org/wiki/Thread_(computing)][Wikipedia: Thread]]
+- [[https://github.com/danicat/pacgo][pacgo: A Pac Man clone written in Go]]
+- [[https://medium.com/preezma/node-js-event-loop-architecture-go-deeper-node-core-c96b4cec7aa4][node.js event loop architecture]]
