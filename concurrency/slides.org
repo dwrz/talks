@@ -2,7 +2,6 @@
 
 - David Wen Riccardi-Zhu
 - Senior Software Engineer @ Good Uncle
-- https://github.com/dwrz
 - dwrz@dwrz.net
 
 Slides and code: https://github.com/dwrz/talks/concurrency.
@@ -135,6 +134,10 @@ Even before that, computers were able to multitask with one core.
 
 * 20. Single Core
 [[file:images/single-core-concurrency.jpg]]
+
+#+begin_src bash
+strace echo "hello world"
+#+end_src
 
 * 21. Multi Core
 [[file:images/preemptive-scheduling-multi-core.jpg]]
@@ -299,6 +302,7 @@ Run: [[file:cmd/mutex/run.sh]]
   - Up to how the scheduler(s) order things at execution time.
 - Concealed bugs
   - Heisenbugs
+- Deadlock and Livelock
 
 * 40. Message Passing
 
@@ -359,7 +363,7 @@ Probably not, because:
 - Network load
 - CPU
   - Ranking goroutine becomes a chokepoint.
-  - Data structures and algorithms could help here.
+  - Better data structures and algorithms could help here.
 - Goroutines are cheap, but not free.
 
 * 49. Possible Solutions
@@ -458,7 +462,7 @@ Concurrent applications running concurrently on distributed computers.
   - Provide context to help you understand what's going on.
   - Practical exposure, to expose some of the trade-offs.
 
-- Awareness and Sensitivity
+- Awareness and Intuition
 
 - Remember:
   - /Premature optimization is the root of all evil/.
