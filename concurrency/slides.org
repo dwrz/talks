@@ -18,8 +18,9 @@ You'll likely encounter it at work:
 
 Performance Benefits
 
-- I/O versus CPU bound applications.
 - Typically outweigh gains from optimized data structures and algorithms.
+  - I/O versus CPU bound applications.
+
 - Hardware limitations.
   - Rate of single core performance improvement is slowing.
   - More cores.
@@ -113,9 +114,9 @@ Computers can "simultaneously" work on:
 
 * 15. How?
 
-- Operating System's *Scheduler*
-- Hardware
-  - /Interrupts/
+Combination of:
+- Operating System *Scheduler*
+- Hardware (/interrupts/)
 
 * 17. Cooperative Scheduling
 [[file:images/cooperative-scheduling.jpg]]
@@ -131,7 +132,7 @@ Computers can "simultaneously" work on:
 
 * 21. Concurrency versus Parallelism
 
-- Parallelism :: performing computations at the same moment.
+- Parallelism :: performing computations at the same time.
   - Multiple cores.
   - Multiples computers.
   - Kind of like having multiple cooks in a kitchen.
@@ -150,7 +151,7 @@ A little more nuance.
 - Process :: a program in execution.
   - Start off with one thread.
   - Can /fork/.
-  - Inter-Process Communication
+  - Communicate via inter-process communication (IPC).
 
 - Thread :: sequence of instructions that can be managed independently by scheduler.
   - Share resources ∴ less resource intensive.
@@ -169,7 +170,7 @@ Press ~H~ to show threads.
 * 25. Languages and Runtimes
 
 - ~C~, ~C++~, ~Rust~ allow for fine-grained control of processes and threads.
-#+begin_src C
+#+begin_src C :output raw
 int main() {
 	fork();
 
@@ -179,7 +180,7 @@ int main() {
 }
 #+end_src
 
-* 26. nodejs
+* 26. JavaScript
 - Single-threaded (for application code).
 - Runtimes implement concurrency via an event loop.
 
@@ -199,7 +200,8 @@ Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals
 - Sequential versus Concurrent Steps
   - Compare with recipes.
 - Concurrency versus Parallelism
-  - Multiple cooks.
+  - Parallelism: multiple cooks, simultaneously /doing/.
+  - Concurrency: one or more cooks, simultaneously /dealing/ with many tasks.
 - Operating System Scheduler
 - Processes and Threads
 - Languages and Runtimes
