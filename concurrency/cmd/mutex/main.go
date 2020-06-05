@@ -27,6 +27,7 @@ func main() {
 	wg.Add(len(adjustments))
 
 	for _, adjustment := range adjustments {
+		// go = placed onto thread, not the stack.
 		go func(adjustment int) {
 			defer wg.Done()
 
