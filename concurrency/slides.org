@@ -114,14 +114,8 @@ Computers can "simultaneously" work on:
 * 15. How?
 
 - Operating System's *Scheduler*
-- Hardware (interrupts)
-- Not just multiple cores!
-
-* 16. NB: Concurrency != Parallelism
-
-First consumer multi-core CPUs released in mid-2000's.
-
-Even before that, computers were able to multitask with one core.
+- Hardware
+  - /Interrupts/
 
 * 17. Cooperative Scheduling
 [[file:images/cooperative-scheduling.jpg]]
@@ -132,92 +126,75 @@ Even before that, computers were able to multitask with one core.
 * 19. Preemptive Scheduling
 [[file:images/preemptive-scheduling-tree.jpg]]
 
-* 20. Single Core
-[[file:images/single-core-concurrency.jpg]]
-
-#+begin_src bash
-strace echo "hello world"
-#+end_src
-
-* 21. Multi Core
+* 20. Multi Core
 [[file:images/preemptive-scheduling-multi-core.jpg]]
 
-* 22. Concurrency versus Parallelism
+* 21. Concurrency versus Parallelism
 
 - Parallelism :: performing computations at the same moment.
   - Multiple cores.
   - Multiples computers.
   - Kind of like having multiple cooks in a kitchen.
+    - Can do different things at the same time.
+    - Can do one job faster (peeling a lot of potatoes).
 
 - Concurrency :: performing computations over inter-leaving, non-sequential time periods.
   - Single or multi-core.
 
-* 23. Processes and Threads
+* 22. Processes and Threads
+A little more nuance.
 
-Computers can "simultaneously" work on:
-
-- Different /parts/ of a recipe
 - Different /recipes/
+- Different /parts/ of a recipe
 
-- Process :: a program in execution (recipe).
-- Thread :: smallest sequence of programmed instructions that can be managed independently by a scheduler (part of a recipe).
+- Process :: a program in execution.
+  - Start off with one thread.
+  - Can /fork/.
+  - Inter-Process Communication
 
-* 24. Processes and Threads
+- Thread :: sequence of instructions that can be managed independently by scheduler.
+  - Share resources ∴ less resource intensive.
+  - Can communicate via shared resources.
 
-Processes
-- Have their own memory space
-  - Instructions
-  - Constants
-  - Stack
-  - Heap
-- Start out with one thread (the /main/ thread).
-- Can fork -- create a child process.
-- Inter-Process Communication (IPC)
-
-* 25. Processes and Threads
-
-Threads (a.k.a, lightweight processes)
-
-- Share:
-  - Memory
-  - Instructions
-  - Open files (descriptors)
-  - Signals and signal handlers
-  - Etcetera...
-
-- Less resource intensive than processes.
-
-* 26. Processes and Threads
+* 23. Processes and Threads
 
 [[file:images/process-vs-thread.jpg]]
 
 Source: https://stackoverflow.com/questions/16354460/forking-vs-threading/16354658
 
-* 27. htop
+* 24. htop
 
 Press ~H~ to show threads.
 
-* 28. Languages and Runtimes
+* 25. Languages and Runtimes
 
 - ~C~, ~C++~, ~Rust~ allow for fine-grained control of processes and threads.
+#+begin_src C
+int main() {
+	fork();
 
-- ~JavaScript~: single-threaded (for your code), runtimes (Chrome, nodejs) implement concurrency via an event loop.
+	printf("Hello world!\n");
 
-- ~Go~: runtime multi-threading, multiplexes goroutines onto threads.
+	return 0;
+}
+#+end_src
 
-* 29. nodejs
+* 26. nodejs
+- Single-threaded (for application code).
+- Runtimes implement concurrency via an event loop.
 
 [[file:images/nodejs-event-loop.png]]
 
 Source: [[https://medium.com/preezma/node-js-event-loop-architecture-go-deeper-node-core-c96b4cec7aa4]]
 
-* 30. Go
+* 27. Go
+Runtime multi-threading, multiplexes goroutines onto threads.
 
 [[file:images/go-scheduler.png]]
 
 Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals/
 
-* 31. Quick Review
+* 28. Quick Review
 
 - Sequential versus Concurrent Steps
   - Compare with recipes.
@@ -227,7 +204,7 @@ Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals
 - Processes and Threads
 - Languages and Runtimes
 
-* 32. Part 2: Using Concurrency
+* 29. Part 2: Using Concurrency
 
 Typical use cases:
 - Network I/O
@@ -244,33 +221,29 @@ Typical use cases:
 
 - Solving problems that are best expressed with concurrency.
 
-* 33. JavaScript
-
-- Callbacks
-- Promises
-- async/await
+* 30. JavaScript
 
 What is the output of the following? Why?
 #+begin_src javascript
 console.log('start');
 
-setTimeout(() => console.log('callback 1'), 0);
+setTimeout(() => console.log('1'), 0);
 
 console.log('middle');
 
-setTimeout(() => console.log('callback 2'), 0);
+setTimeout(() => console.log('2'), 0);
 
 console.log('end');
 #+end_src
 
-* 34. Go
+* 31. Go Examples
 
 1. Shared Memory with Mutex (Mutual Exclusion)
    - Pitfall: synchronization, debugging.
 2. Message Passing (Channels and Goroutines)
    - Pitfall: resources usage, complexity.
 
-* 35. Mutex Example
+* 32. Mutex Example
 Concurrent updates to a bank account balance.
 
 Code:
@@ -280,31 +253,29 @@ Run: [[file:cmd/mutex/run.sh]]
   - Without mutex.
   - With mutex.
 
-* 36. Data Races
+* 33. Data Races
 [[file:images/data-race.jpg]]
 
-* 37. Mutex
+* 34. Mutex
 
 /Mutual Exclusion/
 
 - Purpose: protect a critical section of code.
 - Effect: serialization.
 
-* 38. Race Detector
+* 35. Race Detector
 
 - Without mutex.
 - With mutex.
 
-* 39. Tradeoffs: Validating Correctness, Testing, Debugging
+* 36. Tradeoffs: Validating Correctness, Testing, Debugging
 
 - Non-deterministic behavior
   - Works fine on one run, fatal bug in another.
   - Up to how the scheduler(s) order things at execution time.
 - Concealed bugs
-  - Heisenbugs
-- Deadlock and Livelock
 
-* 40. Message Passing
+* 37. Message Passing
 
 Proverbs:
 #+begin_quote
@@ -313,9 +284,9 @@ Don't communicate by sharing memory, share memory by communicating.
 Channels orchestrate, mutexes serialize.
 #+end_quote
 
-* 41. Requirements
+* 38. Requirements
 
-- Read CSV
+- Read CSV of zip codes
   - 50 in our example
   - Full list is ~42,000
 
@@ -325,27 +296,27 @@ Channels orchestrate, mutexes serialize.
 
 - Display running list of top ten temperatures.
 
-* 42. Concurrency Hallmarks
+* 39. Concurrency Hallmarks
 
 - Repeatedly processing similar data (lines of CSV)
 - Network I/O
 - UI I/O
 
-* 43. Message Passing Example
+* 40. Message Passing Example
 
 Run: [[file:cmd/csp/run.sh]]
 
-* 44. Code Walkthrough
+* 41. Code Walkthrough
 
 [[file:cmd/csp/main.go]]
 
-* 45. Channels and Goroutines
+* 42. Channels and Goroutines
 [[file:images/message-passing-example-diagram.jpg]]
 
-* 46. Channels and Goroutines
+* 43. Channels and Goroutines
 [[file:images/go-scheduler.jpg]]
 
-* 47. Scaling
+* 44. Scaling
 
 What if:
 - We wanted to process the entire list of 42,000 zip codes?
@@ -353,7 +324,7 @@ What if:
 
 Could we just get rid of the limiter?
 
-* 48. Resources
+* 45. Resources
 
 Probably not, because:
 
@@ -366,12 +337,12 @@ Probably not, because:
   - Better data structures and algorithms could help here.
 - Goroutines are cheap, but not free.
 
-* 49. Possible Solutions
+* 46. Possible Solutions
 
 - Use a semaphore to limit concurrency.
 - Buffers
 
-* 50. Designing and Managing Concurrency
+* 47. Designing and Managing Concurrency
 
 - Size of input matters.
 - Resources
@@ -380,7 +351,7 @@ Probably not, because:
 - Backpressure
 - Complexity
 
-* 51. Quick Review
+* 48. Quick Review
 
 Techniques for implementing and managing concurrency:
 - Event loop
@@ -394,7 +365,7 @@ Concurrency Pitfalls:
 - Complexity
   - Need to think differently about concurrent code.
 
-* 52. Part 3: Infrastructure Concurrency
+* 49. Part 3: Infrastructure Concurrency
 
 Concurrent applications running concurrently on distributed computers.
 
@@ -403,31 +374,10 @@ Concurrent applications running concurrently on distributed computers.
 - Databases
 - Host and Network Infrastructure
 
-* 53. Student Context
-
-- Simple architectures:
-  - Monolithic
-  - Single DB
-- Few concurrent users
-
-* 54. Professional Context
-
-- Complex, sometimes messy architectures.
-  - Containers
-  - Queues
-  - Workers
-  - Tech Debt
-  - Multiple Servers
-  - Microservices
-  - Multiple datastores
-  - Distributed databases
-- Many concurrent users
-- Running longer (more vulnerable to failures, downtime)
-
-* 55. Example
+* 50. Example
 [[file:images/infrastructure-data-race.jpg]]
 
-* 56. Review
+* 51. Review
 
 - What concurrency is
   - Sequential versus concurrent
@@ -437,7 +387,7 @@ Concurrent applications running concurrently on distributed computers.
   - Operating System Scheduler and Interrupts
   - Languages and Runtimes
 
-* 57. Review
+* 52. Review
 
 - When, why, and how to use it
   - I/O + UI
@@ -450,12 +400,12 @@ Concurrent applications running concurrently on distributed computers.
   - Debugging
   - Complexity
 
-* 58. Review
+* 53. Review
 
 - Infrastructure
   - Data Race
 
-* 59. Conclusion
+* 54. Conclusion
 
 - Goals:
   - Give you a rough sense of what concurrency is.
@@ -469,7 +419,7 @@ Concurrent applications running concurrently on distributed computers.
   - Tradeoffs and economics (resources, costs, developer time).
   - Learning is continuous...
 
-* 60. Further Reading
+* 55. Further Reading
 
 - [[https://slikts.github.io/concurrency-glossary/][Concurrency Glossary]]
 - [[https://blog.golang.org/waza-talk][Concurrency is not parallelism]]
