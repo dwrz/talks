@@ -61,7 +61,7 @@ A second is a duration, not an instant.
 
 Two things can happen in the same second and not be simultaneous.
 
-In computer science, this nuance matters.
+With computers, this nuance matters.
 
 * 9. Time
 
@@ -98,10 +98,12 @@ Source: [[https://www.prowesscorp.com/computer-latency-at-a-human-scale/]]
 * 12. Cooking Recipes
 
 - Step-by-step
-- Concurrent
-  - Pre-heat oven
-  - Boil water
-  - Timers
+- Concurrent:
+  - Handle other tasks while:
+    - Preheating oven
+    - Boiling water
+    - Waiting for timers
+  - Switching back to a task when it is ready for mork work.
 
 * 13. Multitasking
 
@@ -117,6 +119,10 @@ Computers can "simultaneously" work on:
 Combination of:
 - Operating System *Scheduler*
 - Hardware (/interrupts/)
+  - Keyboard
+  - Filesystem
+  - Network Card
+  - Timer
 
 * 17. Cooperative Scheduling
 [[file:images/cooperative-scheduling.jpg]]
@@ -149,6 +155,7 @@ A little more nuance.
 - Different /parts/ of a recipe
 
 - Process :: a program in execution.
+  - Unique resources (memory, code, files, etc.).
   - Start off with one thread.
   - Can /fork/.
   - Communicate via inter-process communication (IPC).
@@ -188,42 +195,7 @@ int main() {
 
 Source: [[https://medium.com/preezma/node-js-event-loop-architecture-go-deeper-node-core-c96b4cec7aa4]]
 
-* 27. Go
-Runtime multi-threading, multiplexes goroutines onto threads.
-
-[[file:images/go-scheduler.png]]
-
-Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals/
-
-* 28. Quick Review
-
-- Sequential versus Concurrent Steps
-  - Compare with recipes.
-- Concurrency versus Parallelism
-  - Parallelism: multiple cooks, simultaneously /doing/.
-  - Concurrency: one or more cooks, simultaneously /dealing/ with many tasks.
-- Operating System Scheduler
-- Processes and Threads
-- Languages and Runtimes
-
-* 29. Part 2: Using Concurrency
-
-Typical use cases:
-- Network I/O
-   - Requests between clients and servers.
-   - Requests to a database.
-   - Requests between microservices.
-   - Requests to external APIs.
-
-- User interfaces
-  - Capturing user input
-  - Rendering output
-
-- Similar, but independent computations.
-
-- Solving problems that are best expressed with concurrency.
-
-* 30. JavaScript
+* 27. Aside: Event Loop
 
 What is the output of the following? Why?
 #+begin_src javascript
@@ -238,10 +210,45 @@ setTimeout(() => console.log('2'), 0);
 console.log('end');
 #+end_src
 
+* 28. Go
+*Runtime scheduler* manages multiple threads.
+[[file:images/go-scheduler.png]]
+
+Source: https://freethreads.net/2019/01/23/go-runtime-scheduler-design-internals/
+
+* 29. Quick Review
+
+- Sequential versus Concurrent Steps
+  - Compare with recipes.
+- Concurrency versus Parallelism
+  - Parallelism: multiple cooks, simultaneously /doing/.
+  - Concurrency: one or more cooks, /dealing/ with many tasks.
+- Operating System Scheduler
+- Processes and Threads
+- Languages and Runtimes
+
+* 30. Part 2: Using Concurrency
+
+Typical use cases:
+- Network I/O between:
+   - Clients and servers.
+   - Services and database(s).
+   - Microservices.
+   - Service and external APIs.
+
+- User interfaces
+  - Capturing user input
+  - Rendering output
+
+- Similar, but independent computations.
+
+- Solving problems that are best expressed with concurrency.
+
 * 31. Go Examples
 
 1. Shared Memory with Mutex (Mutual Exclusion)
    - Pitfall: synchronization, debugging.
+
 2. Message Passing (Channels and Goroutines)
    - Pitfall: resources usage, complexity.
 
@@ -253,7 +260,6 @@ Code:
 
 Run: [[file:cmd/mutex/run.sh]]
   - Without mutex.
-  - With mutex.
 
 * 33. Data Races
 [[file:images/data-race.jpg]]
@@ -265,7 +271,14 @@ Run: [[file:cmd/mutex/run.sh]]
 - Purpose: protect a critical section of code.
 - Effect: serialization.
 
+Run: [[file:cmd/mutex/run.sh]]
+  - With mutex.
+
 * 35. Race Detector
+
+How can we be sure?
+
+Race detector can give us /some/ confidence (but no guarantees).
 
 - Without mutex.
 - With mutex.
@@ -286,7 +299,7 @@ Don't communicate by sharing memory, share memory by communicating.
 Channels orchestrate, mutexes serialize.
 #+end_quote
 
-* 38. Requirements
+* 38. Program Requirements
 
 - Read CSV of zip codes
   - 50 in our example
@@ -383,7 +396,7 @@ Concurrent applications running concurrently on distributed computers.
 
 - What concurrency is
   - Sequential versus concurrent
-  - Comparison with recipes
+  - Comparison with recipes and cooks
   - Compared to parallelism
 - How it is implemented
   - Operating System Scheduler and Interrupts
