@@ -1,0 +1,391 @@
+* 1. x86 Assembly
+
+- David Wen Riccardi-Zhu
+- Senior Software Engineer @ Good Uncle
+- dwrz@dwrz.net
+
+Slides and code: https://github.com/dwrz/talks/x86-assembly.
+
+* 2. Overview
+
+1. Follow a trail of questions... into the depths of the machine.
+2. Peel away some abstractions on the way.
+3. Gloss over a bunch of stuff (we have an hour, not a semester).
+4. Surface (hopefully) with a better understanding of how computers work.
+
+* 3. What does this program do?
+
+#+begin_src bash :results raw
+node -e "console.log('Hello, World');"
+#+end_src
+
+* 4. How does this program /work/?
+
+#+begin_src bash :results raw
+node -e "console.log('Hello, World');"
+#+end_src
+
+How does "Hello World" get onto the terminal?
+
+* 5. What does this program do?
+
+#+begin_src bash
+node -e ""
+#+end_src
+
+Does it do /anything/?
+
+* 6. It does /something/.
+
+We can tell, because it takes a few milliseconds to execute.
+
+#+begin_src bash :results raw
+time node -e "console.log('Hello, World');"
+#+end_src
+
+#+begin_src bash :results raw
+time node -e ""
+#+end_src
+
+* 7. It /definitely/ does /something/.
+
+We can tell, because it's making system calls.
+
+#+begin_src bash :results raw
+strace node -e ""
+#+end_src
+
+Lot of noise for a program that does "nothing"...
+
+#+begin_src bash :results raw
+strace node -e "console.log('Hello, World');"
+#+end_src
+
+* 8. JavaScript
+We've actually started with something difficult.
+
+JavaScript is an interpreted language.
+
+#+begin_src js
+const myProgram = '0 + 1'.replace('+', '-');
+
+const result = eval(myProgram);
+
+console.log(result); // -1
+#+end_src
+
+#+RESULTS:
+
+* 9. C
+Let's use a simpler example.
+
+C is compiled.
+
+We create our own program, rather than use a program that interprets strings.
+
+#+begin_src C :results raw
+#include <stdio.h>
+
+int main(void) {
+	printf("Hello, World\n");
+}
+#+end_src
+
+* 10. Compile and Execute
+
+#+begin_src bash
+gcc hello-world.c -o hello-world
+#+end_src
+
+#+begin_src bash
+./hello-world
+#+end_src
+
+#+begin_src bash
+strace ./hello-world
+#+end_src
+
+* 11. write
+This seems familiar:
+#+begin_src C
+write(1, "Hello, World\n", 13Hello, World
+)          = 13
+#+end_src
+
+It's in our node program, too:
+#+begin_src bash
+strace node -e "console.log('Hello, World');" 2>&1 | grep "Hello"
+#+end_src
+
+/What is this?/
+What is ~write~?
+What is 1?
+What is 13?
+
+* 12. System Calls
+~strace~ shows us system calls. ~write~ is a system call.
+
+What is a system call?
+
+#+begin_src bash
+man syscalls
+#+end_src
+
+#+begin_quote
+The system call is the fundamental interface between an application and the Linux kernel.
+#+end_quote
+
+* 13. write
+
+#+begin_src bash
+man 2 write
+#+end_src
+
+#+begin_src C
+write(int fd, const void *buf, size_t count);
+#+end_src
+
+#+begin_quote
+write()  writes  up  to count bytes from the buffer starting at buf to the file referred to by the file descriptor fd.
+#+end_quote
+
+* 14. write
+
+#+begin_src text
+write(1, "Hello, World\n", 13Hello, World
+)          = 13
+#+end_src
+
+File Descriptor 1 = Standard Out (inherited from terminal process)
+Hello World = Buffer
+Count = 13 bytes
+
+|---+---+---+---+---+---+---+---+---+---+---+---+----|
+| H | e | l | l | o | , |   | W | o | r | l | d | \n |
+|---+---+---+---+---+---+---+---+---+---+---+---+----|
+| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | 1 | 2 |  3 |
+|---+---+---+---+---+---+---+---+---+---+---+---+----|
+
+* 15. Back to Nothing
+#+begin_src C
+int main(void) {}
+#+end_src
+
+#+begin_src bash
+gcc exit.c -o exit
+#+end_src
+
+#+begin_src bash
+strace ./exit
+#+end_src
+
+* 16. Exit Code
+In C, the return type prefixes the function.
+
+~main~ returns an ~int~; the default is zero (indicating no error).
+
+#+begin_src C
+int main(void) {
+	return 1;
+}
+#+end_src
+
+#+begin_src C
+exit_group(1)
+#+end_src
+
+* 17. exit_group
+#+begin_src bash
+man 2 exit_group
+#+end_src
+
+#+begin_src C
+void exit_group(int status);
+#+end_src
+
+* 18. Exit
+
+[[file:src/exit/exit.s:]]
+
+* 19. Assemble, Link, Execute, Trace
+#+begin_src bash
+as exit.s -o exit.o
+
+ld exit.o -o exit
+
+./exit
+
+strace ./exit
+#+end_src
+
+* 20. x86 Assembly
+- Human readable form of machine code.
+- 1-to-1 mapping between one assembly instruction and one CPU instruction.
+- Hardware specific: e.g., x86 Assembly differs from ARM Assembly.
+- Often OS specific --> Linux System Calls != BSD, Mac, Windows system calls.
+- Different syntax formats: ATT, Intel.
+- What instructions? Need to consult hardware manual.
+  - [[https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html][Intel x86 Developer Manual]] is ~5,000 pages long, plus errata.
+
+* 21. Use Cases
+- Low-level programming (micro-controllers, operating systems)
+- Resource Constrained Hardware
+  - [[https://github.com/chrislgarry/Apollo-11][Apollo 11 Guidance Computer Assembly]]
+  - [[https://github.com/pret/pokered][Pokemon Red/Blue Assembly]]
+- Performance
+- Control
+- Reverse Engineering
+
+* 22. Instructions
+- Describe an operation the CPU should perform, e.g.:
+  - Move data in and out of registers
+  - Modify register contents
+  - Modify stack
+  - Control program flow
+- Represented by numbers (opcodes).
+
+* 23. Instruction Cycle
+- On every tick of its internal clock, the CPU:
+  - *Fetches* the next instruction.
+  - *Decodes* it (what operation, on what operands).
+  - *Executes* the instruction.
+  - Increments the instruction pointer.
+
+* 24. Registers
+- Storage on the CPU (fastest storage).
+- Act as a scratchpad -- temporary variables.
+- General Purpose Registers
+  - RAX, RBX, RCX
+  - RSP, RBP (stack pointer, stack frame pointer)
+- Special Purpose Registers
+  - RIP (Instruction Pointer)
+  - RFLAGS (negative, zero, etc.)
+- It's possible to use just a portion of the register.
+#+begin_src text
+|__64__|__56__|__48__|__40__|__32__|__24__|__16__|__8___|
+|__________________________RAX__________________________|
+|xxxxxxxxxxxxxxxxxxxxxxxxxxx|____________EAX____________|
+|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|_____AX______|
+|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|__AH__|__AL__|
+#+end_src
+
+* 25. Exit++
+
+[[file:src/math/math.s]]
+
+* 26. Sections
+What happens when we run a program? A few things...
+
+One of them: the kernel loads the executable into memory.
+
+Assembly sections refer to executable's memory layout:
+
+|-----------|
+| TEXT      | --> Code (instructions)
+| RODATA    | --> const str = "Hello, World";
+| DATA      | --> var str = "Hello, World";
+| BSS       | --> var str;
+| ↓ HEAP ↓  |
+|           |
+| ↑ STACK ↑ |
+|-----------|
+
+* 27. Hello World
+
+[[file:src/hello-world/hello-world.s]]
+
+* 28. Control Flow
+Programs are either sequential, looping, or branching.
+
+- CPU sets FLAGS register after instruction: e.g., result is zero, negative.
+- Jump to code based on the state of FLAGS.
+- Jump changes RIP (instruction pointer).
+
+[[file:src/control-flow/control-flow.s]]
+
+* 29. Stack
+RSP register points to the top of the stack.
+RBP register (typically) points to the (current) base of the stack.
+Together, they form a stack frame.
+
+Instructions:
+- ~push~ :: decrements RSP, moves bytes onto stack.
+- ~pop~ :: increments RSP, moves stack bytes into register.
+
+[[file:src/stack/stack.s]]
+
+* 30. Functions
+Why do we use functions? Same reasons apply in Assembly:
+- Reuse
+- Organization
+- Abstraction
+- Splitting work
+
+Problems:
+- How to pass arguments?
+  - Registers -- which ones?
+  - Stack -- what order?
+- Whose job is it to preserve or clean up registers? Caller? Callee?
+  - E.g., caller saves a value in %rbx to use after function returns.
+  - Callee uses %rbx and overwrites that value.
+- How to pass return value(s)?
+
+* 31. Convention
+Which side of the street should we drive on?
+Either way works, both are used in practice.
+What matters is agreement on an approach.
+
+System V AMD64 ABI is calling convention for Unix x64 systems:
+- Some registers must be saved by the caller, so callee can use them.
+- Some registers must be saved by callee, if the plan to use them later.
+- Some registers used to pass arguments.
+- Stack used to pass extra or large arguments.
+- RAX and RDX are used for return values.
+
+* 32. Stack Arguments
+
+[[file:src/func/func.s]]
+
+Each row is 8 bytes (64 bits).
+|----------------+-----------+----------------|
+|        Address |      Data | Stack Pointers |
+|----------------+-----------+----------------|
+| 0x7fffffffe8f8 |           |                |
+| 0x7fffffffe900 | 0x0 (rbp) |                |
+| 0x7fffffffe908 |  0x401002 |                |
+| 0x7fffffffe910 |         3 | ←rsp           |
+|----------------+-----------+----------------|
+←rbp
+
+* 33. Safety and Security
+
+[[file:src/safety/safety.s]]
+
+* 34. Review
+Where we started:
+
+#+begin_src bash
+node -e ""
+#+end_src
+
+- CPU processes instructions
+- Uses registers and memory (stack)
+- Control flow with jump instruction and flags register
+- Functions
+- System Calls
+- Comparison with Compiled and Interpreted Languages
+- Tradeoffs
+
+* 35. Conclusion
+- Appreciation for higher level, and work done to get us here.
+- Insight into how computers work.
+- A platform to better understand things like functions, closures, APIs, pass by reference and pass by value, performance.
+
+* 36. References / Further Reading
+
+- Davy Wybiral, [[https://www.youtube.com/playlist?list=PLmxT2pVYo5LB5EzTPZGfFN0c2GDiSXgQe][Intro to x86 Assembly Language]]
+- Jennifer Rexford, [[https://www.cs.princeton.edu/courses/archive/fall05/cos217/][Princeton COS 217: Introduction to Programming Systems]]
+- [[https://en.wikipedia.org/wiki/Objdump][objdump]]
+- [[https://en.wikipedia.org/wiki/Structured_program_theorem][Structured Program Theorem]]
+- [[https://www.gnu.org/software/gdb/][GDB]]
+- [[https://www.youtube.com/watch?v=tpIctyqH29Q&list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo][Crash Course: Computer Science]]
