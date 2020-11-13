@@ -205,7 +205,7 @@ void exit_group(int status);
 
 * 18. Exit
 
-[[file:src/exit/exit.s:]]
+[[file:src/exit/exit.s]]
 
 * 19. Assemble, Link, Execute, Trace
 #+begin_src bash
@@ -237,12 +237,12 @@ strace ./exit
 - Reverse Engineering
 
 * 22. Instructions
+- Represented by numbers (opcodes).
 - Describe an operation the CPU should perform, e.g.:
   - Move data in and out of registers
   - Modify register contents
   - Modify stack
   - Control program flow
-- Represented by numbers (opcodes).
 
 * 23. Instruction Cycle
 - On every tick of its internal clock, the CPU:
@@ -250,6 +250,14 @@ strace ./exit
   - *Decodes* it (what operation, on what operands).
   - *Executes* the instruction.
   - Increments the instruction pointer.
+
+#+begin_src bash
+hexdump -C exit
+#+end_src
+
+#+begin_src bash
+objdump -D exit
+#+end_src
 
 * 24. Registers
 - Storage on the CPU (fastest storage).
@@ -285,7 +293,7 @@ Assembly sections refer to executable's memory layout:
 | RODATA    | --> const str = "Hello, World";
 | DATA      | --> var str = "Hello, World";
 | BSS       | --> var str;
-| ↓ HEAP ↓  |
+| ↓ HEAP ↓  | --> (for traditional C)
 |           |
 | ↑ STACK ↑ |
 |-----------|
@@ -385,7 +393,6 @@ node -e ""
 
 - Davy Wybiral, [[https://www.youtube.com/playlist?list=PLmxT2pVYo5LB5EzTPZGfFN0c2GDiSXgQe][Intro to x86 Assembly Language]]
 - Jennifer Rexford, [[https://www.cs.princeton.edu/courses/archive/fall05/cos217/][Princeton COS 217: Introduction to Programming Systems]]
-- [[https://en.wikipedia.org/wiki/Objdump][objdump]]
 - [[https://en.wikipedia.org/wiki/Structured_program_theorem][Structured Program Theorem]]
 - [[https://www.gnu.org/software/gdb/][GDB]]
 - [[https://www.youtube.com/watch?v=tpIctyqH29Q&list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo][Crash Course: Computer Science]]
