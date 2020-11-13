@@ -29,3 +29,13 @@ square:
         pop %rbp
 	# ret pops and return to address on stack.
 	ret
+
+# |----------------+-----------+----------------|
+# |        Address |      Data | Stack Pointers |
+# |----------------+-----------+----------------|
+# | 0x7fffffffe8f8 |           |                |
+# | 0x7fffffffe900 | 0x0 (rbp) |                |
+# | 0x7fffffffe908 |  0x401002 |                |
+# | 0x7fffffffe910 |         3 | ←rsp           |
+# |----------------+-----------+----------------|
+#  ←rbp
