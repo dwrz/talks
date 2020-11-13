@@ -28,12 +28,13 @@ node -e "console.log('Hello, World');"
 How does "Hello World" get onto the terminal?
 
 * 5. What does this program do?
+Let's try something simpler.
 
 #+begin_src bash
 node -e ""
 #+end_src
 
-Does it do /anything/?
+Does this do /anything/?
 
 * 6. It does /something/.
 
@@ -398,11 +399,12 @@ node -e ""
 - Insight into how computers work.
 - Appreciation for higher level, and work done to get us here.
 - A platform to better understand things like functions, closures, APIs, pass by reference and pass by value, performance.
+- A few mysteries to leave you curious...
 
 * 36. References / Further Reading
 
 - [[https://www.youtube.com/watch?v=tpIctyqH29Q&list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo][Crash Course: Computer Science]]
 - Davy Wybiral, [[https://www.youtube.com/playlist?list=PLmxT2pVYo5LB5EzTPZGfFN0c2GDiSXgQe][Intro to x86 Assembly Language]]
+- [[https://www.gnu.org/software/gdb/][GDB]]
 - Jennifer Rexford, [[https://www.cs.princeton.edu/courses/archive/fall05/cos217/][Princeton COS 217: Introduction to Programming Systems]]
 - [[https://en.wikipedia.org/wiki/Structured_program_theorem][Structured Program Theorem]]
-- [[https://www.gnu.org/software/gdb/][GDB]]
