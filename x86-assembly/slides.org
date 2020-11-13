@@ -8,7 +8,7 @@ Slides and code: https://github.com/dwrz/talks/x86-assembly.
 
 * 2. Overview
 
-1. Follow a trail of questions... into the depths of the machine.
+1. Follow a trail of questions into the depths of the machine.
 2. Peel away some abstractions on the way.
 3. Gloss over a bunch of stuff (we have an hour, not a semester).
 4. Surface (hopefully) with a better understanding of how computers work.
@@ -40,11 +40,11 @@ Does it do /anything/?
 We can tell, because it takes a few milliseconds to execute.
 
 #+begin_src bash :results raw
-time node -e "console.log('Hello, World');"
+time node -e ""
 #+end_src
 
 #+begin_src bash :results raw
-time node -e ""
+time node -e "console.log('Hello, World');"
 #+end_src
 
 * 7. It /definitely/ does /something/.
@@ -224,17 +224,33 @@ strace ./exit
 - Hardware specific: e.g., x86 Assembly differs from ARM Assembly.
 - Often OS specific --> Linux System Calls != BSD, Mac, Windows system calls.
 - Different syntax formats: ATT, Intel.
+  - Examples use ATT syntax.
 - What instructions? Need to consult hardware manual.
   - [[https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html][Intel x86 Developer Manual]] is ~5,000 pages long, plus errata.
+
+#+begin_src bash
+lscpu
+#+end_src
 
 * 21. Use Cases
 - Low-level programming (micro-controllers, operating systems)
 - Resource Constrained Hardware
-  - [[https://github.com/chrislgarry/Apollo-11][Apollo 11 Guidance Computer Assembly]]
-  - [[https://github.com/pret/pokered][Pokemon Red/Blue Assembly]]
+  - [[https://github.com/chrislgarry/Apollo-11][Apollo 11 Guidance Computer Assembly]] (1969)
+  - [[https://github.com/pret/pokered][Pokemon Red/Blue Assembly]] (1996, AA batteries)
 - Performance
+  - Less runtime overhead (system calls, etc)
+  - Better code than compiler (harder to do these days)
 - Control
+  - Instructions not available in higher level language
 - Reverse Engineering
+
+#+begin_src bash
+hexdump -C exit
+#+end_src
+
+#+begin_src bash
+objdump -D exit
+#+end_src
 
 * 22. Instructions
 - Represented by numbers (opcodes).
@@ -250,14 +266,6 @@ strace ./exit
   - *Decodes* it (what operation, on what operands).
   - *Executes* the instruction.
   - Increments the instruction pointer.
-
-#+begin_src bash
-hexdump -C exit
-#+end_src
-
-#+begin_src bash
-objdump -D exit
-#+end_src
 
 * 24. Registers
 - Storage on the CPU (fastest storage).
@@ -307,7 +315,7 @@ Programs are either sequential, looping, or branching.
 
 - CPU sets FLAGS register after instruction: e.g., result is zero, negative.
 - Jump to code based on the state of FLAGS.
-- Jump changes RIP (instruction pointer).
+- Jump changes instruction pointer.
 
 [[file:src/control-flow/control-flow.s]]
 
@@ -342,6 +350,8 @@ Problems:
 Which side of the street should we drive on?
 Either way works, both are used in practice.
 What matters is agreement on an approach.
+
+[[file:static/convention.jpg]]
 
 System V AMD64 ABI is calling convention for Unix x64 systems:
 - Some registers must be saved by the caller, so callee can use them.
@@ -385,14 +395,14 @@ node -e ""
 - Tradeoffs
 
 * 35. Conclusion
-- Appreciation for higher level, and work done to get us here.
 - Insight into how computers work.
+- Appreciation for higher level, and work done to get us here.
 - A platform to better understand things like functions, closures, APIs, pass by reference and pass by value, performance.
 
 * 36. References / Further Reading
 
+- [[https://www.youtube.com/watch?v=tpIctyqH29Q&list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo][Crash Course: Computer Science]]
 - Davy Wybiral, [[https://www.youtube.com/playlist?list=PLmxT2pVYo5LB5EzTPZGfFN0c2GDiSXgQe][Intro to x86 Assembly Language]]
 - Jennifer Rexford, [[https://www.cs.princeton.edu/courses/archive/fall05/cos217/][Princeton COS 217: Introduction to Programming Systems]]
 - [[https://en.wikipedia.org/wiki/Structured_program_theorem][Structured Program Theorem]]
 - [[https://www.gnu.org/software/gdb/][GDB]]
-- [[https://www.youtube.com/watch?v=tpIctyqH29Q&list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo][Crash Course: Computer Science]]
