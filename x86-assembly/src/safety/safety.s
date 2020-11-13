@@ -7,7 +7,7 @@ juliet:
 stop:
 	# Try changing this number. What happens? Why?
 	# Hint: try 0, 1, 11, 12, 21, 22.
-	.int 11
+	.int 12
 
 .text
 	.global _start
